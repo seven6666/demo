@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>帧速率FPS</title>
+	<style>
+		*{ margin:0;padding:0; }
+		body{ background:#ccc;text-align:center; }
+		#mycanvas{ margin-top:20px;background:#363636; }
+
+	</style>
+	
+</head>
+<body>
+		<canvas id="mycanvas" width="1000" height="600">
+			您的破浏览器不支持
+		</canvas>
+<script>
+	
+	var canvas = document.getElementById('mycanvas');
+	var context = mycanvas.getContext('2d');
+    var balls = 30;     //球个数
+    var circleArr = [];//定义圆心数组
+    
+    //公共样式
+    context.strokeStyle = 'rgba(247, 247, 247, 0.9)';
+    context.strokeWidth = 1;
+    context.fillStyle = 'rgba(128, 126, 126, 0.7)';
+
+    
+    //线
+    function Line (x, y, _x, _y,a) {
+            this.beginX = x,
+			this.beginY = y,
+			this.closeX = _x,
+			this.closeY = _y,
+			this.o = a;
+		};
+    function drawLine(x, y, _x, _y, a) {
+			var line = new Line(x, y, _x, _y, a)
+			context.beginPath()
+			context.strokeStyle = 'rgba(247,247,247,'+a+')'
+			context.moveTo(line.beginX, line.beginY)
+			context.lineTo(line.closeX, line.closeY)
+			context.stroke();
+       
+		};
+   
+    
+    //定义圆
+    function circle(x,y,r,moveX,moveY){
+        	this.x = x,
+			this.y = y,
+			this.r = r,
+			this.moveX = moveX,
+			this.moveY = moveY;
+           
+    }
+    
+    circle.prototype ={
+        
+       	num:function(max, _min) {
+			var min = arguments[1] || 0;
+			return Math.floor(Math.random()*(max-min+1)+min);
+		},
+        
+        //初始值
+        int :function(){
+            var self = this;
+             circleArr = [];
+            for(var i=0;i<balls;i++){
+            
+                circleArr.push(self.drawCricle(self.num(800),self.num(600),self.num(15, 2),self.num(10,-10)/60,self.num(10,-10)/60));
+            }
+            draw();
+        },
+
+       //绘制圆
+     drawCricle:function(x,y,r,moveX,moveY){
+            var cle = new circle(x, y, r, moveX, moveY)
+            var self = this
+            self.x = x;
+            self.y = y;
+            self.r = r;
+            self.moveX = moveX;
+            self.moveY = moveY;
+            context.beginPath();
+            context.arc(self.x,self.y,self.r,0,2*Math.PI,false);
+            context.fill();
+            return cle;
+       }
+
+    }
+    
+    //生成新对象
+    var ocircle =  new circle();
+    
+    // 初始
+    ocircle.int();
+    
+    //每帧调用
+    function draw(){
+        context.clearRect(0,0,canvas.width,canvas.height); //清屏
+        for(var i=0;i< balls;i++){
+            ocircle.drawCricle(circleArr[i].x, circleArr[i].y, circleArr[i].r,circleArr[i].moveX,circleArr[i].moveY);
+            var cir = circleArr[i];
+            cir.x += cir.moveX;
+            cir.y += cir.moveY;
+            
+            //边界
+            cir.moveY= cir.y>=(canvas.height + 2*cir.r) || cir.y<cir.r ? -1*cir.moveY : cir.moveY;
+		    cir.moveX = cir.x<cir.r || (canvas.width + 2*cir.r)<=cir.x ? -1*cir.moveX : cir.moveX;
+        }
+        for(var j=0;j<balls;j++){
+            for(var k=0;k<balls;k++){
+                if (k + j < balls) {
+						var A = Math.abs(circleArr[k+j].x - circleArr[j].x),
+							B = Math.abs(circleArr[k+j].y - circleArr[j].y);
+						var lineLength = Math.sqrt(A*A + B*B);
+						var C = 1/lineLength*7;
+						var lineOpacity = C > 0.02 ? 0.02 : 0;
+						if (lineOpacity>0) {
+                            drawLine(circleArr[j].x,circleArr[j].y,circleArr[j+k].x, circleArr[j+k].y,lineOpacity);
+                        }
+                }
+            }
+            
+        }
+        
+            window.requestAnimationFrame(draw);
+        }
+            window.requestAnimationFrame(draw);
+    </script>
+    </body>
+</html>
